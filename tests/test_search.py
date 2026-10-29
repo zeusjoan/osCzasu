@@ -58,3 +58,13 @@ def test_visit_fields(conn, resolved):
     v = search(conn, "lidl", None, None, resolved)[0]["visits"][0]
     assert v["person_name"] == "Jan" and v["date"] == "2025-05-14"
     assert v["start"] == "2025-05-14T16:24:00+02:00" and v["duration_s"] == 17 * 60
+
+
+def test_home_is_not_merged_with_nearby_shop(conn, resolved):
+    with conn:
+        conn.execute("UPDATE places SET status='done', osm_id='node/9', name='Żabka', category='sklep spożywczy'"
+                     " WHERE place_key='PHOME'")
+    groups = search(conn, "", date(2025, 5, 14), date(2025, 5, 14), None)
+    assert len(groups) == 5
+    assert [g["count"] for g in groups if g["name"] == "Dom"] == [1]
+    assert "Dom" not in [g["name"] for g in search(conn, "sklep", None, None, None)]

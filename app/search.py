@@ -3,7 +3,7 @@ import json
 import sqlite3
 from datetime import date
 
-from app.dayview import _duration, _local, display_name
+from app.dayview import SEMANTIC_NAMES, _duration, _local, display_name
 from app.textnorm import norm
 
 
@@ -43,10 +43,14 @@ def search(conn: sqlite3.Connection, q: str, date_from: date | None, date_to: da
 
     for v in conn.execute(sql, args):
         name = display_name(v["semantic_type"], v)
-        if not needle or needle in norm(name) or needle in norm(v["category"]):
-            g = group(v["osm_id"] or v["place_key"], name, v["category"], v["address"])
+        semantic = v["semantic_type"] in SEMANTIC_NAMES
+        # Home/Work are their own places: never merged with (or matched by) the nearest shop's POI.
+        key = v["place_key"] if semantic else (v["osm_id"] or v["place_key"])
+        category = None if semantic else v["category"]
+        if not needle or needle in norm(name) or needle in norm(category):
+            g = group(key, name, category, v["address"])
             if not g["_confident"]:
-                g.update(name=name, category=v["category"], address=v["address"], _confident=True)
+                g.update(name=name, category=category, address=v["address"], _confident=True)
             entry = _visit_entry(v, False, None)
             g["visits"].append(entry)
             g["count"] += 1

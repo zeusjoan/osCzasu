@@ -72,7 +72,8 @@ def get_day(conn: sqlite3.Connection, person_id: int, day: date) -> list[dict]:
             "kind": "visit", "id": v["id"],
             "start": _local(v["start_utc"], v["tz_offset_min"]), "end": _local(v["end_utc"], v["tz_offset_min"]),
             "duration_s": _duration(v["start_utc"], v["end_utc"]),
-            "name": display_name(v["semantic_type"], v), "category": v["category"], "address": v["address"],
+            "name": display_name(v["semantic_type"], v),
+            "category": None if v["semantic_type"] in SEMANTIC_NAMES else v["category"], "address": v["address"],
             "lat": v["lat"], "lng": v["lng"], "place_key": v["place_key"],
             "resolved": v["status"] == "done", "children": [],
         }

@@ -58,3 +58,11 @@ def test_invalid_mode_rejected(conn, imported):
 def test_unknown_activity_rejected(conn, imported):
     with pytest.raises(KeyError):
         set_activity_mode(conn, 999, "cycling")
+
+
+def test_home_does_not_show_nearby_shop_category(conn, imported):
+    with conn:
+        conn.execute("UPDATE places SET status='done', name='Żabka', category='sklep spożywczy'"
+                     " WHERE place_key='PHOME'")
+    home = get_day(conn, imported, date(2025, 5, 14))[0]
+    assert (home["name"], home["category"]) == ("Dom", None)

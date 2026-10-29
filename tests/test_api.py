@@ -72,3 +72,9 @@ def test_search_endpoint(client, uploaded):
 def test_index_served(client):
     r = client.get("/")
     assert r.status_code == 200 and r.headers["content-type"].startswith("text/html")
+
+
+def test_delete_person_removes_uploaded_files(client, uploaded, tmp_path):
+    assert len(list((tmp_path / "uploads").iterdir())) == 1
+    client.delete(f"/api/persons/{uploaded}")
+    assert list((tmp_path / "uploads").iterdir()) == []

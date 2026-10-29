@@ -163,7 +163,8 @@ function drawDay(items, fit) {
     const marker = L.circleMarker([v.lat, v.lng], {
       radius: 7, color: "#202124", weight: 2, fillColor: "#fff", fillOpacity: 1,
     }).addTo(dayLayer);
-    marker.bindTooltip(`${v.name} · ${clock(v.start)}–${clock(v.end)} · ${duration(v.duration_s)}`);
+    // Names come from OSM (editable by anyone): pass a text node so they are never parsed as HTML.
+    marker.bindTooltip(el("span", {}, `${v.name} · ${clock(v.start)}–${clock(v.end)} · ${duration(v.duration_s)}`));
     marker.on("click", () => highlight(`visit-${v.id}`, { scroll: true }));
     state.layers[`visit-${v.id}`] = marker;
     bounds.push([v.lat, v.lng]);
@@ -352,6 +353,10 @@ $("upload-form").addEventListener("submit", async (e) => {
     if (personId === NEW_PERSON) {
       const p = await api("/api/persons", jsonBody("POST", { name: $("upload-new-name").value }));
       personId = p.id;
+      // Select the new person right away, so retrying after a failed upload does not create another one.
+      await loadPersons(p.id);
+      fillUploadPersons();
+      await loadDay(null);
     }
     const form = new FormData();
     form.append("file", file);
@@ -382,9 +387,14 @@ async function pollProgress() {
     const pending = p.done < p.total;
     box.hidden = !pending;
     box.textContent = `Nazwy miejsc: ${p.done}/${p.total}`;
-    const finished = state.progress && state.progress.done < state.progress.total && !pending;
+    const advanced = state.progress && p.done > state.progress.done;
     state.progress = p;
-    if (finished && !$("day-view").hidden) await loadDay(state.date, { fit: false });
+    const unresolved = state.items.some((it) => it.kind === "visit"
+      && (!it.resolved || it.children.some((c) => !c.resolved)));
+    if (advanced && unresolved && state.date && !$("day-view").hidden && !$("day-list").querySelector("select")) {
+      const active = document.querySelector(".item.active");
+      await loadDay(state.date, { fit: false, keep: active ? active.dataset.key : null });
+    }
     if (pending) progressTimer = setTimeout(pollProgress, 5000);
   } catch (_) {
     progressTimer = setTimeout(pollProgress, 15000);

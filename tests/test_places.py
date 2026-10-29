@@ -84,3 +84,26 @@ def test_short_address_uses_square_or_pedestrian_when_no_road():
     assert short_address({"address": {"road": "Puławska", "house_number": "12", "town": "Piaseczno"}}) \
         == "Puławska 12, Piaseczno"
     assert short_address({"address": {}, "display_name": "Gdzieś"}) == "Gdzieś"
+
+
+def test_overpass_remark_error_is_a_failure(conn, imported):
+    from app.places import check_overpass
+    import pytest
+    with pytest.raises(OsmError):
+        check_overpass({"elements": [], "remark": "runtime error: Query timed out in \"query\" at line 1"})
+    assert check_overpass({"elements": [1]}) == [1]
+
+
+def test_pick_poi_builds_address_from_tags():
+    els = [{"type": "node", "id": 2, "lat": 52.2, "lon": 21.2, "tags": {
+        "name": "Lidl", "shop": "supermarket", "addr:street": "Puławska", "addr:housenumber": "12",
+        "addr:city": "Warszawa"}}]
+    sel, _ = pick_poi(els, 52.2, 21.2)
+    assert sel["address"] == "Puławska 12, Warszawa"
+
+
+def test_process_one_stores_poi_address(conn, imported):
+    els = [{"type": "node", "id": 2, "lat": 52.2, "lon": 21.2, "tags": {
+        "name": "Lidl", "shop": "supermarket", "addr:street": "Puławska", "addr:housenumber": "12"}}]
+    process_one(conn, FakeClient(nearby=els), NOW)
+    assert conn.execute("SELECT address FROM places WHERE status='done'").fetchone()[0] == "Puławska 12"

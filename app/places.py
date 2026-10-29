@@ -83,6 +83,7 @@ def pick_poi(elements: list[dict], lat: float, lng: float) -> tuple[dict | None,
             "name": tags["name"],
             "category": classify(tags),
             "distance_m": round(_distance_m(lat, lng, el_lat, el_lng)),
+            "address": _tag_address(tags),
         })
     candidates.sort(key=lambda c: c["distance_m"])
     return (candidates[0] if candidates else None), candidates
@@ -109,9 +110,10 @@ class OsmClient:
         try:
             r = self._http.post(OVERPASS_URL, data={"data": query})
             r.raise_for_status()
-            return r.json().get("elements", [])
+            data = r.json()
         except (httpx.HTTPError, ValueError) as e:
             raise OsmError(str(e)) from e
+        return check_overpass(data)
 
     def reverse(self, lat: float, lng: float) -> str | None:
         self._wait()
@@ -123,6 +125,19 @@ class OsmClient:
         except (httpx.HTTPError, ValueError) as e:
             raise OsmError(str(e)) from e
         return short_address(data)
+
+
+def check_overpass(data: dict) -> list[dict]:
+    """Overpass reports overload/timeouts as HTTP 200 with a 'remark'; treat that as a failure, not 'no POI'."""
+    remark = (data.get("remark") or "").lower()
+    if "error" in remark or "timed out" in remark:
+        raise OsmError(data["remark"])
+    return data.get("elements", [])
+
+
+def _tag_address(tags: dict) -> str | None:
+    street = " ".join(x for x in (tags.get("addr:street") or tags.get("addr:place"), tags.get("addr:housenumber")) if x)
+    return ", ".join(x for x in (street, tags.get("addr:city")) if x) or None
 
 
 def short_address(data: dict) -> str | None:
@@ -148,7 +163,7 @@ def process_one(conn: sqlite3.Connection, client, now: datetime) -> bool:
         return False
     try:
         selected, candidates = pick_poi(client.nearby(row["lat"], row["lng"]), row["lat"], row["lng"])
-        address = None if selected else client.reverse(row["lat"], row["lng"])
+        address = selected["address"] if selected else client.reverse(row["lat"], row["lng"])
     except OsmError as e:
         attempts = row["attempts"] + 1
         retry = now + timedelta(minutes=min(2 ** attempts, 360))

@@ -86,7 +86,11 @@ def create_app(data_dir: Path, start_worker: bool = True, osm_contact: str = "")
     @app.delete("/api/persons/{person_id}", status_code=204)
     def delete_person(person_id: int, conn=Depends(get_conn)):
         require_person(conn, person_id)
+        file_ids = [r[0] for r in conn.execute("SELECT id FROM files WHERE person_id=?", (person_id,))]
         importer.delete_person(conn, person_id)
+        for file_id in file_ids:
+            for path in uploads.glob(f"{file_id}_*"):
+                path.unlink(missing_ok=True)
         return Response(status_code=204)
 
     @app.post("/api/persons/{person_id}/files")
