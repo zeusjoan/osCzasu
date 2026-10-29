@@ -1,6 +1,6 @@
 # Oś Czasu
 
-Prywatna przeglądarka historii lokalizacji z Google Timeline. Wczytujesz pliki `Timeline.json` kilku osób, a potem oglądasz dzień po dniu na mapie: trasy (samochód, rower, pieszo…) i odwiedzone miejsca z nazwami z OpenStreetMap. Możesz też szukać, kiedy i jak długo byłeś w danym sklepie.
+Prywatna przeglądarka historii lokalizacji z Google Timeline. Wczytujesz pliki `Timeline.json` kilku osób, a potem oglądasz dzień po dniu: odwiedzone miejsca jako punkty na mapie (z nazwami z OpenStreetMap) i listę przejazdów (samochód, rower, pieszo…). Możesz też szukać, kiedy i jak długo byłeś w danym sklepie.
 
 Działa jako jeden kontener Docker w sieci domowej, **bez logowania**. Nie wystawiaj go do internetu.
 
@@ -24,7 +24,7 @@ Obsługiwany jest tylko ten nowy format, eksportowany z telefonu. Stary eksport 
 
 - **Osoby i pliki:** każdy plik przypisujesz do osoby. Jedna osoba może mieć kilka plików. Nowszy plik zastępuje wpisy starszych plików w okresie, który obejmuje, więc nic się nie dubluje.
 - **Nazwy miejsc:** pobierane w tle z OpenStreetMap, około 1 miejsca na sekundę. Pierwsze wczytanie dużego pliku zajmuje kilkanaście minut, a postęp widać u góry („Nazwy miejsc: 312/733”). Każde miejsce jest pytane tylko raz. Jeśli serwer OSM jest przeciążony, aplikacja ponawia zapytania później. Można też ustawić zapasowy serwer w `OVERPASS_URL` (patrz `docker-compose.yml`).
-- **Transport:** etykieta pochodzi od Google. Kliknij przejazd dwa razy, żeby ją poprawić.
+- **Transport:** etykieta pochodzi od Google. Kliknij przejazd na liście, żeby ją poprawić.
 - **Wyszukiwanie:** po nazwie lub kategorii (np. „lidl”, „apteka”), bez znaczenia wielkie litery i polskie znaki. Wizyty, przy których szukany lokal był tylko w pobliżu, są oznaczone jako „możliwie tutaj”.
 
 ## Dane i kopia zapasowa

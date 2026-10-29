@@ -95,8 +95,6 @@ main { flex: 1; display: flex; min-height: 0; }
 .group th, .group td { text-align: left; padding: 4px 10px; border-top: 1px solid var(--border); }
 .group tr.possible td { color: var(--muted); font-style: italic; }
 
-.legend { background: #fff; padding: 6px 8px; border-radius: 6px; font-size: 12px; line-height: 1.6; }
-.legend i { display: inline-block; width: 14px; height: 4px; margin-right: 6px; vertical-align: middle; }
 
 dialog { border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; width: min(420px, 92vw); }
 dialog form { display: flex; flex-direction: column; gap: 10px; }

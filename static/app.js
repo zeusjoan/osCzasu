@@ -11,12 +11,6 @@ const MODE_ICONS = {
   "in train": "🚆", "in tram": "🚋", "in subway": "🚇", "in ferry": "⛴", flying: "✈️",
   motorcycling: "🏍", skiing: "⛷", sailing: "⛵", unknown: "❔",
 };
-const MODE_COLORS = {
-  "in passenger vehicle": "#d93025", cycling: "#188038", walking: "#f29900", running: "#e37400",
-  "in bus": "#9334e6", "in train": "#1a73e8", "in tram": "#12b5cb", "in subway": "#185abc",
-  "in ferry": "#007b83", flying: "#5f6368", motorcycling: "#b31412", skiing: "#4285f4",
-  sailing: "#00897b", unknown: "#80868b",
-};
 const CATEGORY_ICONS = [
   [/^dom$/, "🏠"], [/^praca$/, "🏢"], [/supermarket|sklep|market|piekarnia|mięsny|centrum handlowe/, "🛒"],
   [/stacja paliw/, "⛽"], [/restauracja|kawiarnia|fast food/, "🍴"], [/apteka|przychodnia|szpital/, "💊"],
@@ -105,27 +99,13 @@ L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
 }).addTo(map);
 const dayLayer = L.layerGroup().addTo(map);
-const legend = L.control({ position: "bottomright" });
-legend.onAdd = () => el("div", { class: "legend" });
-legend.addTo(map);
-
-function updateLegend(modes) {
-  const box = legend.getContainer();
-  box.replaceChildren();
-  box.hidden = modes.length === 0;
-  for (const m of modes) {
-    const swatch = el("i");
-    swatch.style.background = MODE_COLORS[m] || MODE_COLORS.unknown;
-    box.append(el("div", {}, swatch, MODE_LABELS[m] || m));
-  }
-}
 
 function highlight(key, { scroll = false, zoom = false } = {}) {
   document.querySelectorAll(".item.active").forEach((n) => n.classList.remove("active"));
   for (const [k, layer] of Object.entries(state.layers)) {
     const on = k === key;
-    if (layer instanceof L.Polyline) layer.setStyle({ weight: on ? 8 : 4, opacity: on ? 1 : 0.75 });
-    else layer.setStyle({ radius: on ? 11 : 7, weight: on ? 3 : 2 });
+    layer.setStyle({ radius: on ? 12 : 8, weight: on ? 3 : 2, fillColor: on ? "#1a73e8" : "#d93025" });
+    if (on) layer.openTooltip(); else layer.closeTooltip();
   }
   const row = document.querySelector(`.item[data-key="${key}"]`);
   if (row) {
@@ -133,35 +113,19 @@ function highlight(key, { scroll = false, zoom = false } = {}) {
     if (scroll) row.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
   const layer = state.layers[key];
-  if (layer && zoom) {
-    if (layer instanceof L.Polyline) map.fitBounds(layer.getBounds(), { padding: [40, 40], maxZoom: 16 });
-    else map.setView(layer.getLatLng(), Math.max(map.getZoom(), 16));
-  }
+  if (layer && zoom) map.setView(layer.getLatLng(), Math.max(map.getZoom(), 16));
   if (layer && layer.bringToFront) layer.bringToFront();
 }
 
 function drawDay(items, fit) {
+  // Only visited places are drawn; trips stay in the list as text.
   dayLayer.clearLayers();
   state.layers = {};
   const bounds = [];
-  const modes = new Set();
-  const visits = [];
-  for (const it of items) {
-    if (it.kind === "activity") {
-      modes.add(it.mode);
-      const line = L.polyline(it.geometry, {
-        color: MODE_COLORS[it.mode] || MODE_COLORS.unknown, weight: 4, opacity: 0.75,
-      }).addTo(dayLayer);
-      line.on("click", () => highlight(`activity-${it.id}`, { scroll: true }));
-      state.layers[`activity-${it.id}`] = line;
-      bounds.push(...it.geometry);
-    } else {
-      visits.push(it, ...it.children);
-    }
-  }
+  const visits = items.filter((it) => it.kind === "visit").flatMap((v) => [v, ...v.children]);
   for (const v of visits) {
     const marker = L.circleMarker([v.lat, v.lng], {
-      radius: 7, color: "#202124", weight: 2, fillColor: "#fff", fillOpacity: 1,
+      radius: 8, color: "#fff", weight: 2, fillColor: "#d93025", fillOpacity: 1,
     }).addTo(dayLayer);
     // Names come from OSM (editable by anyone): pass a text node so they are never parsed as HTML.
     marker.bindTooltip(el("span", {}, `${v.name} · ${clock(v.start)}–${clock(v.end)} · ${duration(v.duration_s)}`));
@@ -169,7 +133,6 @@ function drawDay(items, fit) {
     state.layers[`visit-${v.id}`] = marker;
     bounds.push([v.lat, v.lng]);
   }
-  updateLegend([...modes]);
   if (fit && bounds.length) map.fitBounds(bounds, { padding: [30, 30], maxZoom: 16 });
 }
 
@@ -199,11 +162,10 @@ function activityRow(a) {
     a.corrected ? el("span", { class: "corrected" }, "(poprawione)") : null,
     el("div", { class: "meta" }, `${km(a.distance_m)} · ${duration(a.duration_s)} · ${clock(a.start)}–${clock(a.end)}`));
   li.addEventListener("click", () => {
-    const wasActive = li.classList.contains("active");
-    highlight(key, { zoom: true });
-    if (wasActive && !li.querySelector("select")) li.append(modeSelect(a));
+    highlight(key);
+    if (!li.querySelector("select")) li.append(modeSelect(a));
   });
-  li.title = "Kliknij, aby pokazać; kliknij ponownie, aby poprawić rodzaj transportu";
+  li.title = "Kliknij, aby poprawić rodzaj transportu";
   return li;
 }
 
