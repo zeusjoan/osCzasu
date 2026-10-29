@@ -1,0 +1,5 @@
+Timeline.json
+*.json
+!package.json
+data/
+.superpowers/
