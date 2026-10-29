@@ -1,0 +1,11 @@
+services:
+  oscz:
+    build: .
+    ports:
+      - "8080:8000"
+    volumes:
+      - ./data:/data
+    environment:
+      OSM_CONTACT: "${OSM_CONTACT:-}"
+      # OVERPASS_URL: "https://overpass.kumi.systems/api/interpreter"  # zapasowy serwer, gdy główny jest przeciążony
+    restart: unless-stopped
