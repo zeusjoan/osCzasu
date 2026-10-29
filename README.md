@@ -10,7 +10,7 @@ Działa jako jeden kontener Docker w sieci domowej, **bez logowania**. Nie wysta
 OSM_CONTACT=twoj@email.pl docker compose up -d --build
 ```
 
-Potem otwórz `http://<adres-serwera>:8080`.
+Potem otwórz `http://<adres-serwera>:8081`.
 
 `OSM_CONTACT` trafia do nagłówka `User-Agent` zapytań do OpenStreetMap. Regulamin ich darmowych serwerów prosi o kontakt do autora zapytań.
 
