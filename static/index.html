@@ -1,2 +1,83 @@
 <!doctype html>
-<html lang="pl"><head><meta charset="utf-8"><title>Oś Czasu</title></head><body></body></html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Oś Czasu</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <strong class="logo">Oś czasu</strong>
+    <label>Osoba:
+      <select id="person-select"></select>
+    </label>
+    <button id="person-add" title="Dodaj osobę">＋</button>
+    <button id="person-rename" title="Zmień imię">✎</button>
+    <button id="person-delete" title="Usuń osobę i jej dane">🗑</button>
+    <span class="spacer"></span>
+    <span id="progress" hidden></span>
+    <button id="search-open">🔍 Szukaj</button>
+    <button id="upload-open">⬆ Wczytaj plik</button>
+  </header>
+
+  <main>
+    <aside id="panel">
+      <section id="day-view">
+        <div class="day-nav">
+          <button id="day-prev" title="Poprzedni dzień">◀</button>
+          <input type="date" id="day-input">
+          <button id="day-next" title="Następny dzień">▶</button>
+        </div>
+        <ol id="day-list"></ol>
+      </section>
+
+      <section id="search-view" hidden>
+        <button id="search-back" class="link">← Wróć do dnia</button>
+        <form id="search-form">
+          <input type="search" id="search-q" placeholder="Nazwa lub kategoria, np. lidl, apteka">
+          <div class="row">
+            <label>od <input type="date" id="search-from"></label>
+            <label>do <input type="date" id="search-to"></label>
+          </div>
+          <div class="row">
+            <select id="search-person">
+              <option value="current">Bieżąca osoba</option>
+              <option value="all">Wszystkie osoby</option>
+            </select>
+            <button type="submit">Szukaj</button>
+          </div>
+          <p class="hint">Bez tekstu — wszystkie miejsca z wybranego okresu.</p>
+        </form>
+        <div id="search-results"></div>
+      </section>
+    </aside>
+
+    <div id="map"></div>
+  </main>
+
+  <dialog id="upload-dialog">
+    <form id="upload-form" method="dialog">
+      <h2>Wczytaj plik osi czasu</h2>
+      <label>Osoba
+        <select id="upload-person"></select>
+      </label>
+      <label id="upload-new-wrap" hidden>Imię nowej osoby
+        <input type="text" id="upload-new-name">
+      </label>
+      <label>Plik (Timeline.json z telefonu)
+        <input type="file" id="upload-file" accept=".json,application/json" required>
+      </label>
+      <p id="upload-result" role="status"></p>
+      <div class="row end">
+        <button type="button" id="upload-close">Zamknij</button>
+        <button type="submit" id="upload-submit">Wczytaj</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

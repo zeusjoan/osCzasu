@@ -54,3 +54,8 @@ def test_build_geometry_without_points_is_straight_line():
 def test_unsupported_formats(data):
     with pytest.raises(UnsupportedFormat):
         parse_timeline(data)
+
+
+def test_path_points_are_sorted_by_time():
+    times = [p.time for p in load().path_points]
+    assert times == sorted(times)

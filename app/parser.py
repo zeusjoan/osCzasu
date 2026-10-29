@@ -1,4 +1,5 @@
 """Parse the on-device Google Timeline export (a JSON array of segments)."""
+from bisect import bisect_left, bisect_right
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
@@ -122,11 +123,15 @@ def parse_timeline(data: object) -> ParsedTimeline:
                 result.skipped += 1
         except (KeyError, ValueError, TypeError, AttributeError):
             result.skipped += 1
+    result.path_points.sort(key=lambda p: p.time)
     return result
 
 
 def build_geometry(activity: Activity, points: list[PathPoint]) -> list[tuple[float, float]]:
-    inside = sorted((p for p in points if activity.start <= p.time <= activity.end), key=lambda p: p.time)
+    """Route of an activity; `points` must be sorted by time (parse_timeline returns them so)."""
+    lo = bisect_left(points, activity.start, key=lambda p: p.time)
+    hi = bisect_right(points, activity.end, key=lambda p: p.time)
+    inside = points[lo:hi]
     return (
         [(activity.start_lat, activity.start_lng)]
         + [(p.lat, p.lng) for p in inside]
