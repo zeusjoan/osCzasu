@@ -1,0 +1,22 @@
+[
+ {"startTime":"2025-05-14T07:00:00.000+02:00","endTime":"2025-05-14T07:42:00.000+02:00",
+  "visit":{"hierarchyLevel":"0","probability":"0.9","topCandidate":{"probability":"0.8","semanticType":"Home","placeID":"PHOME","placeLocation":"geo:52.000000,21.000000"}}},
+ {"startTime":"2025-05-14T07:42:00.000+02:00","endTime":"2025-05-14T08:03:00.000+02:00",
+  "activity":{"start":"geo:52.000000,21.000000","end":"geo:52.100000,21.100000","distanceMeters":"12400.000000","probability":"0.9","topCandidate":{"type":"in passenger vehicle","probability":"0.9"}}},
+ {"startTime":"2025-05-14T04:00:00.000Z","endTime":"2025-05-14T06:00:00.000Z",
+  "timelinePath":[{"point":"geo:52.300000,21.300000","durationMinutesOffsetFromStartTime":"30"},
+                  {"point":"geo:52.070000,21.070000","durationMinutesOffsetFromStartTime":"110"},
+                  {"point":"geo:52.050000,21.050000","durationMinutesOffsetFromStartTime":"105"}]},
+ {"startTime":"2025-05-14T10:00:00.000+02:00","endTime":"2025-05-14T12:00:00.000+02:00",
+  "visit":{"hierarchyLevel":"0","probability":"0.9","topCandidate":{"probability":"0.7","semanticType":"Unknown","placeID":"PMALL","placeLocation":"geo:52.150000,21.150000"}}},
+ {"startTime":"2025-05-14T10:30:00.000+02:00","endTime":"2025-05-14T11:00:00.000+02:00",
+  "visit":{"hierarchyLevel":"1","probability":"0.9","topCandidate":{"probability":"0.6","semanticType":"Unknown","placeID":"PSHOP","placeLocation":"geo:52.150100,21.150100"}}},
+ {"startTime":"2025-05-14T16:24:00.000+02:00","endTime":"2025-05-14T16:41:00.000+02:00",
+  "visit":{"hierarchyLevel":"0","probability":"0.9","topCandidate":{"probability":"0.7","semanticType":"Unknown","placeID":"PLIDL","placeLocation":"geo:52.200000,21.200000"}}},
+ {"startTime":"2025-05-14T23:00:00.000+02:00","endTime":"2025-05-15T01:00:00.000+02:00",
+  "visit":{"hierarchyLevel":"0","probability":"0.9","topCandidate":{"probability":"0.7","semanticType":"Unknown","placeLocation":"geo:52.250000,21.250000"}}},
+ {"startTime":"2025-05-14T07:00:00.000+02:00","endTime":"2025-05-20T07:00:00.000+02:00",
+  "timelineMemory":{"destinations":[{"identifier":"PX"}],"distanceFromOriginKms":"10"}},
+ {"startTime":"bad","endTime":"bad","visit":{}},
+ {"startTime":"2025-05-14T07:00:00.000+02:00","endTime":"2025-05-14T08:00:00.000+02:00","somethingNew":{}}
+]

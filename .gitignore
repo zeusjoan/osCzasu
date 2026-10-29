@@ -3,3 +3,6 @@ Timeline.json
 !package.json
 data/
 .superpowers/
+.venv/
+__pycache__/
+!tests/fixtures/*.json
