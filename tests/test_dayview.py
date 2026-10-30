@@ -15,10 +15,10 @@ def test_day_items_order_and_nesting(conn, imported):
     assert items[3]["start"] == "2025-05-14T16:24:00+02:00" and items[3]["duration_s"] == 17 * 60
 
 
-def test_activity_geometry_and_mode(conn, imported):
+def test_activity_mode_without_geometry(conn, imported):
     act = get_day(conn, imported, date(2025, 5, 14))[1]
     assert act["mode"] == "in passenger vehicle" and act["corrected"] is False
-    assert act["geometry"] == [[52.0, 21.0], [52.05, 21.05], [52.07, 21.07], [52.1, 21.1]]
+    assert "geometry" not in act
 
 
 def test_visit_across_midnight_on_both_days(conn, imported):

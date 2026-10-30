@@ -4,7 +4,7 @@ import sqlite3
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-from app.parser import UNSUPPORTED_MESSAGE, UnsupportedFormat, build_geometry, parse_timeline
+from app.parser import UNSUPPORTED_MESSAGE, UnsupportedFormat, parse_timeline
 
 
 @dataclass
@@ -96,11 +96,10 @@ def import_file(conn: sqlite3.Connection, person_id: int, filename: str, raw: by
 
         for a in parsed.activities:
             off, d0, d1 = _local_fields(a.start, a.end)
-            geometry = json.dumps(build_geometry(a, parsed.path_points))
             conn.execute(
                 "INSERT INTO activities(person_id, file_id, start_utc, end_utc, tz_offset_min, local_start_date,"
-                " local_end_date, mode, distance_m, geometry) VALUES (?,?,?,?,?,?,?,?,?,?)",
-                (person_id, file_id, utc_iso(a.start), utc_iso(a.end), off, d0, d1, a.mode, a.distance_m, geometry),
+                " local_end_date, mode, distance_m) VALUES (?,?,?,?,?,?,?,?,?)",
+                (person_id, file_id, utc_iso(a.start), utc_iso(a.end), off, d0, d1, a.mode, a.distance_m),
             )
 
     return ImportReport(file_id, len(parsed.visits), len(parsed.activities), replaced, parsed.skipped)

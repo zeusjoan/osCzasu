@@ -1,7 +1,6 @@
 """Parse the on-device Google Timeline export (a JSON array of segments)."""
-from bisect import bisect_left, bisect_right
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 
 UNSUPPORTED_MESSAGE = (
     "Nieobsługiwany format pliku. Obsługiwany jest eksport osi czasu z telefonu (plik Timeline.json)."
@@ -36,17 +35,9 @@ class Activity:
 
 
 @dataclass
-class PathPoint:
-    time: datetime
-    lat: float
-    lng: float
-
-
-@dataclass
 class ParsedTimeline:
     visits: list[Visit]
     activities: list[Activity]
-    path_points: list[PathPoint]
     skipped: int
 
 
@@ -95,45 +86,21 @@ def _activity(e: dict) -> Activity:
     )
 
 
-def _path(e: dict) -> list[PathPoint]:
-    base = _time(e["startTime"])
-    points = []
-    for p in e["timelinePath"]:
-        lat, lng = _geo(p["point"])
-        offset = timedelta(minutes=float(p["durationMinutesOffsetFromStartTime"]))
-        points.append(PathPoint(time=base + offset, lat=lat, lng=lng))
-    return points
-
-
 def parse_timeline(data: object) -> ParsedTimeline:
     if not isinstance(data, list):
         raise UnsupportedFormat(UNSUPPORTED_MESSAGE)
-    result = ParsedTimeline(visits=[], activities=[], path_points=[], skipped=0)
+    result = ParsedTimeline(visits=[], activities=[], skipped=0)
     for e in data:
         try:
             if "visit" in e:
                 result.visits.append(_visit(e))
             elif "activity" in e:
                 result.activities.append(_activity(e))
-            elif "timelinePath" in e:
-                result.path_points.extend(_path(e))
-            elif "timelineMemory" in e:
+            elif "timelinePath" in e or "timelineMemory" in e:
                 continue
             else:
                 result.skipped += 1
         except (KeyError, ValueError, TypeError, AttributeError):
             result.skipped += 1
-    result.path_points.sort(key=lambda p: p.time)
     return result
 
-
-def build_geometry(activity: Activity, points: list[PathPoint]) -> list[tuple[float, float]]:
-    """Route of an activity; `points` must be sorted by time (parse_timeline returns them so)."""
-    lo = bisect_left(points, activity.start, key=lambda p: p.time)
-    hi = bisect_right(points, activity.end, key=lambda p: p.time)
-    inside = points[lo:hi]
-    return (
-        [(activity.start_lat, activity.start_lng)]
-        + [(p.lat, p.lng) for p in inside]
-        + [(activity.end_lat, activity.end_lng)]
-    )

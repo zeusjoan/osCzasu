@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS activities (
   file_id INTEGER NOT NULL REFERENCES files(id) ON DELETE CASCADE,
   start_utc TEXT NOT NULL, end_utc TEXT NOT NULL, tz_offset_min INTEGER NOT NULL,
   local_start_date TEXT NOT NULL, local_end_date TEXT NOT NULL,
-  mode TEXT NOT NULL, distance_m REAL NOT NULL, geometry TEXT NOT NULL);
+  mode TEXT NOT NULL, distance_m REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS corrections (
   id INTEGER PRIMARY KEY, person_id INTEGER NOT NULL REFERENCES persons(id) ON DELETE CASCADE,
   start_utc TEXT NOT NULL, end_utc TEXT NOT NULL, mode TEXT NOT NULL);
@@ -44,4 +44,7 @@ def connect(path: Path | str) -> sqlite3.Connection:
 
 def init_schema(conn: sqlite3.Connection) -> None:
     conn.executescript(SCHEMA)
+    # databases created before route lines were dropped still carry the column
+    if "geometry" in [r[1] for r in conn.execute("PRAGMA table_info(activities)")]:
+        conn.execute("ALTER TABLE activities DROP COLUMN geometry")
     conn.commit()

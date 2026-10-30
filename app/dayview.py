@@ -1,5 +1,4 @@
 """One person's day: visits (with nested level-1 visits) and activities, plus transport corrections."""
-import json
 import sqlite3
 from datetime import date, datetime, timedelta, timezone
 
@@ -96,7 +95,7 @@ def get_day(conn: sqlite3.Connection, person_id: int, day: date) -> list[dict]:
             "start": _local(a["start_utc"], a["tz_offset_min"]), "end": _local(a["end_utc"], a["tz_offset_min"]),
             "duration_s": _duration(a["start_utc"], a["end_utc"]),
             "mode": c["mode"] if c else a["mode"], "corrected": c is not None,
-            "distance_m": a["distance_m"], "geometry": json.loads(a["geometry"]),
+            "distance_m": a["distance_m"],
         }))
 
     items.sort(key=lambda t: t[0])

@@ -70,3 +70,17 @@ def test_list_and_rename_persons(conn, person):
     create_person(conn, "Ala")
     rename_person(conn, person, "Zenon")
     assert [p["name"] for p in list_persons(conn)] == ["Ala", "Zenon"]
+
+
+def test_old_database_with_geometry_column_still_imports(tmp_path, sample_bytes):
+    from app import db
+    path = tmp_path / "old.db"
+    old = db.connect(path)
+    old.executescript(db.SCHEMA.replace("distance_m REAL NOT NULL);", "distance_m REAL NOT NULL, geometry TEXT NOT NULL);"))
+    old.close()
+    c = db.connect(path)
+    db.init_schema(c)
+    cols = [r[1] for r in c.execute("PRAGMA table_info(activities)")]
+    assert "geometry" not in cols
+    import_file(c, create_person(c, "Jan"), "a.json", sample_bytes, NOW)
+    assert count(c, "activities") == 1
